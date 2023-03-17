@@ -1,10 +1,13 @@
 name: API CI
+
 # on: [push] //Válido cuando tienes un solo proyecto, con varios proyectos (monorepo) es necesario otra configuración.
+
 on:
   push:
     paths:
       - "./api/**"
       - ".github/workflows/api-ci.yml"
+
 
 defaults:
   run:
@@ -19,13 +22,13 @@ jobs:
       - name: Setup Nodejs
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 14
           cache: 'npm'
           cache-dependency-path: ./api/package-lock.json
       - name: install
         shell: bash
         run: npm ci
-      - name: run unit test
+      - name: run linter
         shell: bash
         run: npm run lint
   unit-test:
@@ -36,7 +39,7 @@ jobs:
       - name: Setup Nodejs
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 14
           cache: 'npm'
           cache-dependency-path: ./api/package-lock.json
       - name: install
@@ -48,9 +51,9 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     container:
-      image: node:16
+      image: node:14
 
-    service:
+    services:
       mongo-e2e:
         image: mongo:4.4
         ports:
@@ -58,13 +61,14 @@ jobs:
         env:
           MONGO_INITDB_ROOT_USERNAME: test
           MONGO_INITDB_ROOT_PASSWORD: test123
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: install
         shell: bash
         run: npm ci
-      - name: run unit test
+      - name: run e2e
         shell: bash
         run: npm run test:e2e
         env:
